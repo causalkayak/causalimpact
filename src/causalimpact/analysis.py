@@ -781,15 +781,7 @@ class CausalImpact:
         cum_rel_effect_upper_fmt = "{:.1f}%".format(cum_rel_effect_upper)
         cum_rel_effect_ci_fmt = [cum_rel_effect_lower_fmt, cum_rel_effect_upper_fmt]
 
-        # assuming approximately normal distribution
-        # calculate standard deviation from the 95% conf interval
-        std_pred = (
-            mean_upper - mean_pred
-        ) / 1.96  # from mean_upper = mean_pred + 1.96 * std
-        # calculate z score
-        z_score = (0 - mean_pred) / std_pred
-        # pvalue from zscore
-        p_value = st.norm.cdf(z_score)
+        t_statistic, p_value = st.ttest_rel(post_point_resp, post_point_pred)
         prob_causal = 1 - p_value
         p_value_perc = p_value * 100
         prob_causal_perc = prob_causal * 100
