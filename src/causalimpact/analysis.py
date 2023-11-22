@@ -682,21 +682,15 @@ class CausalImpact:
                         variables do not correlate well with the response
                         variable during the learning period."""
             )
-        if p_value < alpha:
-            stmt5 = textwrap.dedent(
-                """The probability of obtaining this effect by
-                chance is very small (Bayesian one-sided tail-area
-                probability {p}). This means the
-                causal effect can be considered statistically
+        stmt5 = textwrap.dedent(
+            """The probability of obtaining this effect by
+                chance is very small (two-sided t-test yields a
+                p-value of {:.3f}). This means the causal
+                effect can{} be considered statistically
                 significant.""".format(
-                    p=np.round(p_value, 3)
-                )
+                p_value, "not" if p_value >= alpha else ""
             )
-        else:
-            stmt5 = """The probability of obtaining this effect by
-                        chance is p = ", round(p, 3), "). This means the effect may
-                        be spurious and would generally not be considered
-                        statistically significant.""".format()
+        )
 
         print(textwrap.fill(stmt, width=width))
         print("\n")
@@ -781,7 +775,9 @@ class CausalImpact:
         cum_rel_effect_upper_fmt = "{:.1f}%".format(cum_rel_effect_upper)
         cum_rel_effect_ci_fmt = [cum_rel_effect_lower_fmt, cum_rel_effect_upper_fmt]
 
-        t_statistic, p_value = st.ttest_rel(post_point_resp, post_point_pred)
+        t_statistic, p_value = st.ttest_rel(
+            post_point_resp, post_point_pred, alternative="two-sided"
+        )
         prob_causal = 1 - p_value
         p_value_perc = p_value * 100
         prob_causal_perc = prob_causal * 100
